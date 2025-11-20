@@ -1,0 +1,86 @@
+[
+  {
+    "title": "HTML",
+    "image": "/tecnologias/html.svg",
+    "description": "Linguagem de marcação para a estrutura da web.",
+    "rating": 5
+  },
+  {
+    "title": "CSS",
+    "image": "/tecnologias/css.svg",
+    "description": "Estilização e layout visual das páginas.",
+    "rating": 4
+  },
+  {
+    "title": "Tailwind CSS",
+    "image": "/tecnologias/tailwind.svg",
+    "description": "Framework CSS utilitário para design rápido.",
+    "rating": 5
+  },
+  {
+    "title": "JavaScript",
+    "image": "/tecnologias/javascript.svg",
+    "description": "Linguagem de programação para interatividade.",
+    "rating": 5
+  },
+  {
+    "title": "TypeScript",
+    "image": "/tecnologias/typescript.svg",
+    "description": "Superset de JS com tipagem estática segura.",
+    "rating": 4
+  },
+  {
+    "title": "JSON",
+    "image": "/tecnologias/json.svg",
+    "description": "Formato leve para troca de dados.",
+    "rating": 5
+  },
+  {
+    "title": "API RESTful",
+    "image": "/tecnologias/api.svg",
+    "description": "Interface para comunicação entre sistemas.",
+    "rating": 4
+  },
+  {
+    "title": "Swagger",
+    "image": "/tecnologias/swagger.svg",
+    "description": "Ferramenta para documentação de APIs.",
+    "rating": 3
+  },
+  {
+    "title": "GitHub",
+    "image": "/tecnologias/github.svg",
+    "description": "Plataforma de hospedagem de código-fonte.",
+    "rating": 5
+  },
+  {
+    "title": "Codespaces",
+    "image": "/tecnologias/codespaces.svg",
+    "description": "Ambiente de desenvolvimento na nuvem.",
+    "rating": 5
+  },
+  {
+    "title": "GitHub Pages",
+    "image": "/tecnologias/githubpages.svg",
+    "description": "Hospedagem estática gratuita.",
+    "rating": 4
+  },
+  {
+    "title": "React.js",
+    "image": "/tecnologias/react.svg",
+    "description": "Biblioteca JS para criar interfaces de utilizador.",
+    "rating": 5
+  },
+  {
+    "title": "Next.js",
+    "image": "/tecnologias/nextjs.svg",
+    "description": "Framework React para produção e SSR.",
+    "rating": 5
+  },
+  {
+    "title": "Vercel",
+    "image": "/tecnologias/vercel.svg",
+    "description": "Plataforma de frontend e deployment.",
+    "rating": 5
+  }
+]
