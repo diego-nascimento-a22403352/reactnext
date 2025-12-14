@@ -1,27 +1,23 @@
 import React from 'react'
 import tecnologias from '@/app/data/tecnologias.json';
 import Image from 'next/image';
+import TecnologiaCard from '@/components/TecnologiaCard/TecnologiaCard';
+import Link from 'next/link';
 
 export default function TecnologiasPage() {
   return (
-    <div>
-      <h2>Tecnologias Exploradas</h2>
-      {tecnologias.map((tecnologia, i) => {
-        return (
-          <div key={i} className="border rounded-lg p-4 shadow-md flex flex-col items-center text-center hover:shadow-xl transition">
-            <h3 className="text-xl font-semibold mb-2">{tecnologia.title}</h3>
-            <Image
-              src={tecnologia.image}
-              alt={tecnologia.title}
-              width={100}
-              height={100}
-              className="mb-2"
+      <div className="container mx-auto p-8 font-sans">
+      <h2 className="text-2xl font-bold mb-6">Tecnologias Exploradas</h2>
+      <div className="flex flex-wrap gap-4 mt-6 justify-center">
+      {tecnologias.map((tecnologia, index) => (
+        <Link href={`/tecnologias/${index}`}>
+          <TecnologiaCard 
+            title={tecnologia.title} 
+            image={tecnologia.image} 
             />
-            <p className="text-sm text-gray-600 mb-2">{tecnologia.description}</p>
-            <p className="font-bold text-yellow-500">{tecnologia.rating}</p>
-          </div>
-        )
-      })}
-    </div>
+        </Link>
+      ))}
+      </div>
+      </div>
   )
 }
