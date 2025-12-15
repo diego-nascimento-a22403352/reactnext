@@ -1,16 +1,23 @@
-'use client'
-import { useEffect, useState } from "react"
+"use client";
+
+import { useEffect, useState } from "react";
 
 export default function Relogio() {
-    const [hora, setHora] = useState(new Date().toLocaleTimeString());
-    
-    useEffect(() => {
-const id = setInterval(() => {
-setHora(new Date().toLocaleTimeString());
-}, 1000);
-return () => clearInterval(id);
-}, []);
-return (
-        <span>{hora}</span>
-    )
+  const [hora, setHora] = useState<string>("");
+
+  useEffect(() => {
+    function atualizarHora() {
+      const agora = new Date();
+      setHora(agora.toLocaleTimeString());
+    }
+
+    atualizarHora();
+    const intervalo = setInterval(atualizarHora, 1000);
+
+    return () => clearInterval(intervalo);
+  }, []);
+
+  return (
+    <p>{hora}</p>
+  );
 }

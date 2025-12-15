@@ -41,11 +41,11 @@ export default function RootLayout({
             <Link href ="/projetos">Projetos</Link>
             <Link href ="/contador">Contador</Link>
             <Link href ="/input">Input</Link>
-            <Link href ="/produto">Produto</Link>
+            <Link href ="/produtos">Produto</Link>
           </nav>
         </header>
         
-        <main className="bg-blue-200 p-5 rounded-2xl max-w-2xl min-h-[70vh]">
+        <main className="bg-blue-200 w-[60vw] min-h-[40vw] p-3">
           {children}
         </main>
         
