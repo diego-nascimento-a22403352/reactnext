@@ -17,6 +17,7 @@ export default function ProdutoPage() {
     `https://deisishop.pythonanywhere.com/products/${id}`, 
     fetcher
   )
+
   
 
   if (error) return <ProdutoDetalhe />
