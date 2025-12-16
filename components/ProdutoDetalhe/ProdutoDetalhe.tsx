@@ -28,6 +28,7 @@ export default function ProdutoDetalhe({ produto }: ProdutoDetalheProps) {
       localStorage.setItem('favoritos', JSON.stringify(favs))
       setIsFavorite(true)
     }
+    
   }
 
   const [isFavorite, setIsFavorite] = useState<boolean>(() => {
