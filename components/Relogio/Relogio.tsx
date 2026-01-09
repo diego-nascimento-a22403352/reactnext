@@ -3,21 +3,26 @@
 import { useEffect, useState } from "react";
 
 export default function Relogio() {
-  const [hora, setHora] = useState<string>("");
+  const [hora, setHora] = useState<Date | null>(null);
 
   useEffect(() => {
-    function atualizarHora() {
-      const agora = new Date();
-      setHora(agora.toLocaleTimeString());
-    }
+    const update = () => setHora(new Date());
 
-    atualizarHora();
-    const intervalo = setInterval(atualizarHora, 1000);
+    update(); // define a hora só no cliente
+    const timer = setInterval(update, 1000);
 
-    return () => clearInterval(intervalo);
+    return () => clearInterval(timer);
   }, []);
 
+  if (!hora) return null; // evita render no SSR
+
+  const formatar = (num: number) => String(num).padStart(2, "0");
+
   return (
-    <p>{hora}</p>
+    <div className="text-white font-mono">
+      {formatar(hora.getHours())}:
+      {formatar(hora.getMinutes())}:
+      {formatar(hora.getSeconds())}
+    </div>
   );
 }

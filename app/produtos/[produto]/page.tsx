@@ -1,27 +1,27 @@
-'use client'
+"use client";
 
-import useSWR from 'swr'
-import { Produto } from '@/models/interface'
-import ProdutoDetalhe from '@/components/ProdutoDetalhe/ProdutoDetalhe'
-import { useParams } from 'next/navigation'
+import useSWR from "swr";
+import { useParams } from "next/navigation";
+import { Product } from "@/models/interface";
 
-const fetcher = (url: string) => fetch(url).then(res => res.json())
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function ProdutoPage() {
-  const params = useParams()
-  const id = params.produto 
+  const { id } = useParams();
 
-  if (!id) return <ProdutoDetalhe />
-
-  const { data, error } = useSWR<Produto>(
-    `https://deisishop.pythonanywhere.com/products/${id}`, 
+  const { data, error, isLoading } = useSWR<Product>(
+    `https://deisishop.pythonanywhere.com/products/${id}`,
     fetcher
-  )
+  );
 
-  
+  if (isLoading) return <p>A carregar…</p>;
+  if (error) return <p>Erro</p>;
 
-  if (error) return <ProdutoDetalhe />
-  if (!data) return <p className="text-center p-6">Carregando...</p>
-
-  return <ProdutoDetalhe produto={data} />
+  return (
+    <div className="text-black space-y-4">
+    <img src={data?.image} alt={data?.title} width={250}/>
+      <h1>{data?.title}</h1>
+      <p>{data?.description}</p>
+    </div>
+  );
 }

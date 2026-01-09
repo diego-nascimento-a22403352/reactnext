@@ -3,7 +3,7 @@ export interface Rating {
   count: number;
 }
 
-export interface Produto {
+export interface Product {
   id: number;
   title: string;
   price: number;
@@ -13,7 +13,27 @@ export interface Produto {
   rating: Rating;
 }
 
-export interface Categoria {
-  id: number
-  name: string
+export interface Category {
+  name: string;
+}
+
+
+export interface BuyRequest {
+  products: number[];    
+  student: boolean;       
+  coupon?: string;        
+  name: string;           
+}
+
+
+export interface BuyResponse {
+  totalCost: string;   // valor final após descontos
+  reference: string;   // referência de pagamento
+  example: string;     // mensagem personalizada
+  error: string;       // string vazia se não houver erro
+}
+
+
+export interface ErrorResponse {
+  error: string;
 }

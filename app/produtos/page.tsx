@@ -1,129 +1,197 @@
-'use client'
-import useSWR from 'swr'
-import { Produto } from '@/models/interface'
-import { Spinner } from '@/components/ui/spinner'
-import { useState, useEffect } from 'react'
+"use client";
 
-import PesquisaEOrdenacao from '@/components/PesquisaEOrdenacao/PesquisaEOrdenacao'
-import ListaProdutos from '@/components/ListaProdutos/ListaProdutos'
-import Carrinho from '@/components/Carrinho/Carrinho'
+import { Product } from "@/models/interface";
+import useSWR from "swr";
+import { useEffect, useState } from "react";
+import FiltrarProdutos from "@/components/FiltrarProduto";
+import ProdutoCard from "@/components/ProductCard/ProductCard";
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`Erro: ${res.status} ${res.statusText}`)
-  return res.json()
+interface CartItem {
+  produto: Product;
+  quantity: number;
 }
 
 export default function ProdutosPage() {
-  const { data, error, isLoading } = useSWR<Produto[]>('https://deisishop.pythonanywhere.com/products/', fetcher)
+  const fetcher = async (url: string) => {
+    const resposta = await fetch(url);
+    if (!resposta.ok) {
+      throw new Error(`Erro: ${resposta.status} ${resposta.statusText}`);
+    }
+    return resposta.json();
+  };
 
-  const [pesquisa, setPesquisa] = useState('')
-  const [ordenacao, setOrdenacao] = useState('nome-asc')
-  const [produtosFiltrados, setProdutosFiltrados] = useState<Produto[]>([])
+  const url = "https://deisishop.pythonanywhere.com/products/";
+  const { data, error, isLoading } = useSWR<Product[]>(url, fetcher);
 
-  const [carrinho, setCarrinho] = useState<Produto[]>([])
-  const [estudante, setEstudante] = useState(false)
-  const [cupao, setCupao] = useState('')
-  const [respostaCompra, setRespostaCompra] = useState<string | null>(null)
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isStudent, setIsStudent] = useState(false);
+  const [coupon, setCoupon] = useState("");
+  const [buyResponse, setBuyResponse] = useState<any>(null);
+  const [isBuying, setIsBuying] = useState(false);
 
   useEffect(() => {
-    if (!data) return
-    let resultados = data.filter(p =>
-      p.title.toLowerCase().includes(pesquisa.toLowerCase())
-    )
-    resultados = resultados.sort((a, b) => {
-      switch (ordenacao) {
-        case 'nome-asc': return a.title.localeCompare(b.title)
-        case 'nome-desc': return b.title.localeCompare(a.title)
-        case 'preco-asc': return Number(a.price) - Number(b.price)
-        case 'preco-desc': return Number(b.price) - Number(a.price)
-        default: return 0
+    const stored = localStorage.getItem("cart");
+    if (stored) setCart(JSON.parse(stored));
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
+  const addToCart = (produto: Product) => {
+    setCart((prev) => {
+      const existente = prev.find((item) => item.produto.id === produto.id);
+      if (existente) {
+        return prev.map((item) =>
+          item.produto.id === produto.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
       }
-    })
-    setProdutosFiltrados(resultados)
-  }, [pesquisa, ordenacao, data])
+      return [...prev, { produto, quantity: 1 }];
+    });
+  };
 
-  if (error) return <p>Erro ao carregar</p>
-  if (isLoading) return <p><Spinner /></p>
-  if (!data || data.length === 0) return <p>Sem produtos</p>
+  const removeFromCart = (id: number) => {
+    setCart((prev) => prev.filter((item) => item.produto.id !== id));
+  };
 
-  const adicionarAoCarrinho = (produto: Produto) => {
-    if (!carrinho.find(p => p.id === produto.id)) {
-      const novoCarrinho = [...carrinho, produto]
-      setCarrinho(novoCarrinho)
-      localStorage.setItem('carrinho', JSON.stringify(novoCarrinho))
-    }
-  }
+  const total = cart.reduce(
+    (sum, item) => sum + Number(item.produto.price) * item.quantity,
+    0
+  );
 
-  const removerDoCarrinho = (produto: Produto) => {
-    const novoCarrinho = carrinho.filter(p => p.id !== produto.id)
-    setCarrinho(novoCarrinho)
-    localStorage.setItem('carrinho', JSON.stringify(novoCarrinho))
-  }
 
-  const comprar = async () => {
-  try {
-    const response = await fetch('https://deisishop.pythonanywhere.com/buy', {
-      method: 'POST',
-      body: JSON.stringify({
-        products: carrinho.map(p => p.id),
-        name: '',
-        student: estudante,
-        coupon: cupao
-      }),
-      headers: { "Content-Type": "application/json" }
-    })
-    
-    if (!response.ok) throw new Error('Erro ao processar a compra')
-    const data = await response.json()
-
-    let msg = ''
-    if (data.error) {
-      msg = `Erro: ${data.error}`
-    } else {
-      msg = `Compra efetuada! Total: ${data.totalCost}€\nReferência: ${data.reference}`
+  const buy = async () => {
+    if (cart.length === 0) {
+      setBuyResponse({ error: "Carrinho vazio" });
+      return;
     }
 
-    setRespostaCompra(msg)
-    setCarrinho([])
-    localStorage.removeItem('carrinho')
-    setCupao('')
-    setEstudante(false)
-    
-  } catch (err: any) {
-    setRespostaCompra(err.message || 'Erro desconhecido')
-  }
-}
+    const productIds = cart.flatMap((item) =>
+      Array(item.quantity).fill(item.produto.id)
+    );
 
+    try {
+      setIsBuying(true);
+      const response = await fetch(
+        "https://deisishop.pythonanywhere.com/buy/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            products: productIds,
+            name: "Cliente",
+            student: isStudent,
+            coupon: coupon,
+          }),
+        }
+      );
+
+      const text = await response.text();
+      let data: any = null;
+      try {
+        data = text ? JSON.parse(text) : { message: "Compra realizada com sucesso!" };
+      } catch (parseErr) {
+        data = { raw: text };
+      }
+
+      if (!response.ok) {
+        console.error("Resposta de erro da API:", response.status, data);
+        setBuyResponse({
+          error: data?.error || data?.message || `Erro ${response.status}`,
+          status: response.status,
+          body: data,
+        });
+        return;
+      }
+
+      setBuyResponse(data);
+      setCart([]);
+    } catch (err: any) {
+      console.error("Erro ao comprar:", err);
+      setBuyResponse({ error: String(err) });
+    } finally {
+      setIsBuying(false);
+    }
+  };
+
+  if (error) return <p className="text-black">{error.message}</p>;
+  if (isLoading) return <p className="text-black">A descarregar dados…</p>;
+  if (!data) return <p className="text-black">Não há produtos</p>;
 
   return (
-    <section className="flex flex-col gap-6 mt-6">
-      <PesquisaEOrdenacao
-        pesquisa={pesquisa}
-        setPesquisa={setPesquisa}
-        ordenacao={ordenacao}
-        setOrdenacao={setOrdenacao}
-      />
+    <div className="max-w-7xl mx-auto p-6 space-y-10 text-black">
+      <section>
+        <h2 className="text-2xl font-bold mb-6">Produtos</h2>
+        <FiltrarProdutos data={data} addToCart={addToCart} />
+      </section>
 
-      <ListaProdutos
-        produtos={produtosFiltrados}
-        adicionarCarrinho={adicionarAoCarrinho}
-        removerCarrinho={removerDoCarrinho}
-        noCesto={false}
-      />
+      <section>
+        <h2 className="text-2xl font-bold mb-4">Carrinho</h2>
 
-      <Carrinho
-        carrinho={carrinho}
-        removerCarrinho={removerDoCarrinho}
-        estudante={estudante}
-        setEstudante={setEstudante}
-        cupao={cupao}
-        setCupao={setCupao}
-        compra={comprar}
-        respostaCompra={respostaCompra}
-      />
+        {cart.length === 0 && <p>Carrinho vazio</p>}
 
+        <div className="space-y-4">
+          {cart.map((item) => (
+            <div
+              key={item.produto.id}
+              className="flex flex-col sm:flex-row gap-4 items-center border rounded-lg p-4"
+            >
+              <div className="w-full sm:w-1/2">
+                <ProdutoCard
+                  produto={item.produto}
+                  isCart
+                  onRemove={removeFromCart}
+                />
+              </div>
 
-    </section>
-  )
+              <p className="font-medium">Quantidade: {item.quantity}</p>
+            </div>
+          ))}
+        </div>
+
+        <h3 className="text-xl font-semibold mt-6">
+          Total: {total.toFixed(2)} €
+        </h3>
+      </section>
+
+      <section className="border rounded-xl p-6 space-y-4 bg-gray-50">
+        <h2 className="text-2xl font-bold">Finalizar Compra</h2>
+
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={isStudent}
+            onChange={(e) => setIsStudent(e.target.checked)}
+          />
+          Estudante DEISI
+        </label>
+
+        <input
+          type="text"
+          placeholder="Cupão de desconto"
+          value={coupon}
+          onChange={(e) => setCoupon(e.target.value)}
+          className="border rounded px-3 py-2 w-full sm:w-64 text-black"
+        />
+
+        <button
+          onClick={buy}
+          disabled={cart.length === 0 || isBuying}
+          className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+        >
+          {isBuying ? "A processar..." : "Comprar"}
+        </button>
+      </section>
+
+      {buyResponse && !buyResponse.error && buyResponse.message && (
+        <section className="border rounded-xl p-4 bg-green-50">
+          <p className="font-semibold">{buyResponse.message}</p>
+          <p>Referência: <span className="font-mono">{buyResponse.reference}</span></p>
+          <p>Total: <span className="font-mono">{buyResponse.totalCost} €</span></p>
+        </section>
+      )}
+    </div>
+  );
 }

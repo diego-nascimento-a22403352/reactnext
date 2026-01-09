@@ -1,78 +1,51 @@
-import { Produto } from "@/models/interface"
-import Link from "next/link"
-import Image from "next/image"
-import { useState, useEffect } from 'react'
+"use client";
+
+import { Product } from "@/models/interface";
+import { useRouter } from "next/navigation";
 
 interface ProdutoDetalheProps {
-  produto?: Produto
+  produto: Product;
 }
 
 export default function ProdutoDetalhe({ produto }: ProdutoDetalheProps) {
-  if (!produto) return <p className="text-center p-6">Produto não encontrado.</p>
-
-  const imageSrc = produto.image && produto.image.startsWith('http')
-    ? produto.image
-    : produto.image
-      ? `https://deisishop.pythonanywhere.com${produto.image}`
-      : '/placeholder.png'
-
-
-       const toggleFavorite = () => {
-    const favs = JSON.parse(localStorage.getItem('favoritos') || '[]')
-    if (favs.includes(produto.id)) {
-      const next = favs.filter((id: any) => id !== produto.id)
-      localStorage.setItem('favoritos', JSON.stringify(next))
-      setIsFavorite(false)
-    } else {
-      favs.push(produto.id)
-      localStorage.setItem('favoritos', JSON.stringify(favs))
-      setIsFavorite(true)
-    }
-    
-  }
-
-  const [isFavorite, setIsFavorite] = useState<boolean>(() => {
-    try { return JSON.parse(localStorage.getItem('favoritos') || '[]').includes(produto.id) }
-    catch { return false }
-  })
+  const router = useRouter();
 
   return (
-    <section className="p-6 border rounded-xl bg-white shadow-md flex flex-col items-center gap-4 max-w-xl mx-auto">
+    <div className="text-black max-w-3xl mx-auto p-6 space-y-6">
 
-      <Image
-        src={imageSrc}
-        alt={produto?.title ?? "Imagem do produto"}
-        width={200}
-        height={200}
-        className="object-contain"
-      />
-
-
-      <h2 className="text-2xl font-bold text-center">{produto.title}</h2>
-
-      <p className="opacity-80 text-center">{produto.description}</p>
-
-      <p><strong>Categoria:</strong> {produto.category}</p>
-      <p><strong>Preço:</strong> {produto.price} $</p>
-      <p>
-        <strong>Rating:</strong> ⭐ {produto.rating?.rate ?? 0} ({produto.rating?.count ?? 0} avaliações)
-      </p>
 
       <button
-          aria-label={isFavorite ? 'Remover favorito' : 'Adicionar aos favoritos'}
-          onClick={toggleFavorite}
-          className="ml-2 text-xl"
-        >
-          {isFavorite ? '❤️' : '🤍'}
-        </button>
-      
-      <Link
-        href="/produtos"
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        onClick={() => router.push("/produtos")}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition shadow-sm font-medium"
       >
-        ← Voltar aos produtos
-      </Link>
+        ⬅ Voltar à lista
+      </button>
 
-    </section>
-  )
+
+      <div className="flex justify-center">
+        <img
+          src={`https://deisishop.pythonanywhere.com${produto.image}`}
+          alt={produto.title}
+          className="max-h-96 object-contain rounded shadow"
+        />
+      </div>
+
+
+      <h1 className="text-2xl font-bold text-center">{produto.title}</h1>
+
+
+      <p className="text-center text-gray-800">{produto.description}</p>
+
+
+      <div className="flex justify-center gap-4 text-center">
+        <span className="font-medium">Categoria: {produto.category}</span>
+        <span className="font-semibold text-green-600">Preço: {produto.price} €</span>
+      </div>
+
+
+      <p className="text-yellow-600 text-center">
+        {produto.rating.rate} ({produto.rating.count} avaliações)
+      </p>
+    </div>
+  );
 }

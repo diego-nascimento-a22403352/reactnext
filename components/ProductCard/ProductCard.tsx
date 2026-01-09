@@ -1,101 +1,57 @@
-'use client'
+"use client";
 
-import Image from "next/image"
-import { Produto } from "@/models/interface"
-import { useState, useEffect } from 'react'
+import Link from "next/link";
+import { Product } from "@/models/interface";
 
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-
-import Link from "next/link"
-
-interface ProductCardProps {
-  produto: Produto
-  adicionaProduto: () =>void
-  removeProduto: () => void
-  noCesto: boolean
+interface ProdutoCardProps {
+  produto: Product;
+  onAdd?: (produto: Product) => void;
+  onRemove?: (id: number) => void;
+  isCart?: boolean;
 }
 
-export default function ProductCard({ produto, adicionaProduto: adicionaProduto, removeProduto: removeProduto, noCesto: noCesto }: ProductCardProps) {
-  const [isFavorite, setIsFavorite] = useState<boolean>(() => {
-    try { return JSON.parse(localStorage.getItem('favoritos') || '[]').includes(produto.id) }
-    catch { return false }
-  })
-
-  const imageSrc = produto.image.startsWith('http')
-    ? produto.image
-    : `https://deisishop.pythonanywhere.com${produto.image}`
-
-  const toggleFavorite = () => {
-    const favs = JSON.parse(localStorage.getItem('favoritos') || '[]')
-    if (favs.includes(produto.id)) {
-      const next = favs.filter((id: any) => id !== produto.id)
-      localStorage.setItem('favoritos', JSON.stringify(next))
-      setIsFavorite(false)
-    } else {
-      favs.push(produto.id)
-      localStorage.setItem('favoritos', JSON.stringify(favs))
-      setIsFavorite(true)
-    }
-  }
-
-  let conteudoFooter
-
-  if (!noCesto) {
-    conteudoFooter = (
-      <>
-        <button
-          onClick={adicionaProduto}
-          className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
-        >
-          Adicionar ao carrinho
-        </button>
-        <Link
-          href={`/produtos/${produto.id}`}
-          className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 mt-2"
-        >
-          +info
-        </Link>
-      </>
-    )
-  } else {
-    conteudoFooter = (
-      <button
-        onClick={removeProduto}
-        className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-      >
-        Remover do carrinho
-      </button>
-    )
-  }
-
+export default function ProdutoCard({
+  produto,
+  onAdd,
+  onRemove,
+  isCart = false,
+}: ProdutoCardProps) {
   return (
-    <Card className="w-56">
-      <CardHeader className="p-2 flex items-center justify-between">
-        <CardTitle className="text-center">{produto.title}</CardTitle>
+    <div className="border rounded-xl p-4 shadow-sm hover:shadow-md transition flex flex-col text-black">
+      <img
+        src={`https://deisishop.pythonanywhere.com${produto.image}`}
+        alt={produto.title}
+        className="h-40 object-contain mb-4"
+      />
+
+      <h3 className="font-semibold text-lg mb-2">{produto.title}</h3>
+
+      <p className="mb-4">{produto.price} €</p>
+
+      {!isCart ? (
+        <div className="mt-auto flex gap-2">
+          <button
+            onClick={() => onAdd?.(produto)}
+            className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          >
+            Adicionar
+          </button>
+
+          <Link
+            href={`/produtos/${produto.id}`}
+            className="flex-1 text-center border border-blue-600 text-blue-600 py-2 rounded hover:bg-blue-50 transition"
+          >
+            + info
+          </Link>
+        </div>
+      ) : (
         <button
-          aria-label={isFavorite ? 'Remover favorito' : 'Adicionar aos favoritos'}
-          onClick={toggleFavorite}
-          className="ml-2 text-xl"
+          onClick={() => onRemove?.(produto.id)}
+          className="mt-auto bg-red-500 text-white py-2 rounded hover:bg-red-600 transition"
         >
-          {isFavorite ? '❤️' : '🤍'}
+          Remover do carrinho
         </button>
-      </CardHeader>
-
-      <CardContent className="flex flex-col items-center p-2">
-        <Image src={imageSrc} alt={produto.title} width={100} height={100} />
-      </CardContent>
-
-      <CardFooter className="flex flex-col items-center p-2">
-        <p>Categoria: {produto.category}</p>
-        <p className="font-bold">{produto.price} $</p>
-        {conteudoFooter}
-      </CardFooter>
-    </Card>
-  )
+      )}
+    </div>
+  );
 }
