@@ -10,7 +10,7 @@ export default function CaracteristicaPage({ params }: { params: { caracteristic
             </h1>
 
             <p className="text-blue-400 mb-6">
-                Detalhes sobre a característica <strong>{caracteristica}</strong> serão exibidos aqui.
+                Detalhes sobre a característica <strong>{caracteristica}</strong> serão exibidos aqui. 
             </p>
 
             <Link href="/caracteristicas">
